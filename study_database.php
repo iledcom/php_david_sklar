@@ -594,6 +594,7 @@ $stmt->execute(array($_POST['new_dish_name'], $_POST['new_price'], $_POST['is_sp
 находящейся в самом начале данной программы.
 */
 
+Пример 8.28. Программа для ввода записей в таблицу dishes базы данных
 // загрузить вспомогательный класс для составления форм
 require 'FormHelper.php';
 // подключиться к базе данных
@@ -1369,7 +1370,7 @@ $db->exec("UPDATE dishes SET price = 1 WHERE dish_name LIKE $dish");
 классе для составления форм, определенном в отдельном файле FormHelper.php.
 */
 
-Пример 8.53. Программа для поиска записей в таблице dishes
+//Пример 8.53. Программа для поиска записей в таблице dishes
 
 // загрузить вспомогательный класс для составления форм
 require 'FormHelper.php';
@@ -1406,6 +1407,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	// Данные из формы не переданы, отобразить ее снова
 	show_form();
 }
+
 function show_form($errors = array()) {
 	// установить свои значения по умолчанию
 	$defaults = array('min_price' => '5.00', 'max_price' => '25.00');
@@ -1415,6 +1417,7 @@ function show_form($errors = array()) {
 	// формы вынесен в отдельный файл
 	include 'retrieve-form.php';
 }
+
 function validate_form() {
 	$input = array();
 	$errors = array();
@@ -1446,6 +1449,7 @@ function validate_form() {
 	}
 	return array($errors, $input);
 }
+
 function process_form($input) {
 	// получить доступ к глобальной переменной $db
 	// в теле данной функции
@@ -1590,4 +1594,86 @@ matched" (Совпавшие блюда отсутствуют). В против
 кодирования любых специальных символов в наименовании блюда — функция htmlentities().
 В условном операторе if() удобные для базы данных значения 1 и 0 в столбце is_spicy преоб-
 разуются в более удобные для восприятия пользователем значения Yes и No соответственно.
+*/
+
+//PDO::prepare — Подготавливает запрос к выполнению и возвращает связанный с этим запросом объект
+// public PDO::prepare ( string $statement [, array $driver_options = array() ] ) : PDOStatement
+/*
+Подготавливает SQL-запрос к базе данных к запуску посредством метода PDOStatement::execute(). Запрос может содержать именованные (:name) или неименованные (?) псевдопеременные, которые будут заменены реальными значениями во время запуска запроса на выполнение. Использовать одновременно и именованные, и неименованные псевдопеременные в одном запросе нельзя, необходимо выбрать что-то одно. Используйте псевдопеременные, чтобы привязать к запросу пользовательский ввод, не включайте данные, введенные пользователем, напрямую в запрос.
+
+Вы должны подбирать уникальные имена псевдопеременных для каждого значения, которое необходимо передавать в запрос при вызове PDOStatement::execute(). Нельзя использовать одну псевдопеременную в запросе более одного раза, кроме варианта, когда включен режим эмуляции.
+*/
+
+// Variant 1
+			$sql = 'UPDATE article
+				SET 
+					cat=:cat,
+					title=:title,
+					description=:description,
+					art_text=:art_text,
+					art_date=:art_date,
+					metatitle:=metatitle,
+					metadesc=:metadesc,
+					metakeys=:metakeys,
+					slug=:slug
+				WHERE art_id = :art_id';
+
+			$stmt = $this->db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+
+			$stmt->execute(array(':cat' => $cat, ':title' => $input['title'], ':description' => $input['description'], ':art_text' => $input['art_text'], ':art_date' => $input['art_date'], ':metatitle' => $input['metatitle'], ':metadesc' => $input['metadesc'], ':metakeys' => $input['metakeys'], ':slug' => $input['slug'], ':art_id' => $art_id));
+
+// Variant 2
+
+			$stmt = $this->db->prepare('UPDATE article
+				SET 
+					cat=:cat,
+					title=:title,
+					description=:description,
+					art_text=:art_text,
+					art_date=:art_date,
+					metatitle:=metatitle,
+					metadesc=:metadesc,
+					metakeys=:metakeys,
+					slug=:slug
+				WHERE art_id = :art_id');
+
+			$stmt->bindParam(":cat", $cat);
+			$stmt->bindParam(":title", $input['title']);
+			$stmt->bindParam(":description", $input['description']);
+			$stmt->bindParam(":art_text", $input['art_text']);
+			$stmt->bindParam(":art_date", $input['art_date']);
+			$stmt->bindParam(":metatitle", $input['metatitle']);
+			$stmt->bindParam(":metadesc", $input['metadesc']);
+			$stmt->bindParam(":metakeys", $input['metakeys']);
+			$stmt->bindParam(":slug", $input['slug']);
+			$stmt->bindParam(":art_id", $art_id);
+
+			$stmt->execute();
+
+// Variant 3
+			$stmt = $this->db->prepare('UPDATE article
+				SET 
+					cat=:cat,
+					title=:title,
+					description=:description,
+					art_text=:art_text,
+					art_date=:art_date,
+					metatitle:=metatitle,
+					metadesc=:metadesc,
+					metakeys=:metakeys,
+					slug=:slug
+				WHERE art_id = :art_id');
+
+			$stmt->bindValue(":cat", $cat);
+			$stmt->bindValue(":title", $input['title']);
+			$stmt->bindValue(":description", $input['description']);
+			$stmt->bindValue(":art_text", $input['art_text']);
+			$stmt->bindValue(":art_date", $input['art_date']);
+			$stmt->bindValue(":metatitle", $input['metatitle']);
+			$stmt->bindValue(":metadesc", $input['metadesc']);
+			$stmt->bindValue(":metakeys", $input['metakeys']);
+			$stmt->bindValue(":slug", $input['slug']);
+			$stmt->bindValue(":art_id", $art_id);
+
+			$stmt->execute();
 */

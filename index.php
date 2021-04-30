@@ -91,7 +91,7 @@ try {
 // установить исключения при ошибках в базе данных
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // установить режим извлечения строк таблицы в виде объектов
-$db->setAttribute(PDO::ATTR_DEFAULT_FEТCH_MODE, PDO::FETCH_OBJ);
+$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 // задать варианты выбора из списка формы, определяющие
 // наличие специй в блюде
 $spicy_choices = array('no','yes','either');
